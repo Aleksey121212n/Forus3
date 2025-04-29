@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>VuetifyList+Router+Vuex</title>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.6.15/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  </head>
+  <body>
+
+    <div id="app">
+      <v-app>
+        <v-app-bar app color="indigo" dark>
+          <v-toolbar-title>Приложение для задач</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn text to="/" tag="router-link">Главная</v-btn>
+          <v-btn text to="/about" tag="router-link">О приложении</v-btn>
+        </v-app-bar>
+
+        <v-main>
+          <router-view></router-view>
+        </v-main>
+      </v-app>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.15/dist/vuetify.js"></script>
+    <script src="https://unpkg.com/vue-router@3.5.4/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
+
+
+
+    <script>
+        const store = new Vuex.Store({
+          state: {
+            tasks: [
+              { text: 'Оплатить коммунальные услуги', done: false },
+              { text: 'Прочитать 10 страниц книги', done: false },
+              { text: 'Прогулка', done: false },
+              { text: 'Закончить отчёт по работе', done: false },
+              { text: 'Купить продукты', done: false }
+            ]
+          },
+          mutations: {
+            addTask(state, text) {
+              state.tasks.push({ text, done: false });
+            },
+            deleteTask(state, index) {
+              state.tasks.splice(index, 1);
+            },
+            toggleDone(index) {
+                this.tasks[index].done = !this.tasks[index].done;
+            }
+          }
+        });
+      
+        const Home = {
+          data() {
+            return {
+              newTask: ''
+            };
+          },
+          computed: {
+            tasks() {
+              return this.$store.state.tasks;
+            }
+          },
+          methods: {
+            addTask() {
+              const text = this.newTask.trim();
+              if (text) {
+                this.$store.commit('addTask', text);
+                this.newTask = '';
+              }
+            },
+            deleteTask(index) {
+              this.$store.commit('deleteTask', index);
+            },
+            toggleDone(index) {
+              this.$store.commit('toggleDone', index);
+            }
+          },
+          template: `
+            <v-container>
+              <v-card class="pa-5 mt-5">
+                <v-card-title>
+                  <h2 class="text-h5 font-weight-bold">📝 Список дел</h2>
+                </v-card-title>
+                <v-card-text>
+                  <v-text-field
+                    v-model="newTask"
+                    label="Добавить задачу"
+                    @keyup.enter="addTask"
+                    outlined
+                    dense
+                  ></v-text-field>
+                  <v-btn color="primary" @click="addTask">Добавить</v-btn>
+      
+                  <v-list two-line class="mt-5">
+                    <v-list-item
+                      v-for="(task, index) in tasks"
+                      :key="index"
+                    >
+                      <v-list-item-action>
+                        <v-checkbox
+                          v-model="task.done"
+                          @change="toggleDone(index)"
+                        ></v-checkbox>
+                      </v-list-item-action>
+      
+                      <v-list-item-content>
+                        <v-list-item-title :class="{ 'text-decoration-line-through': task.done }">
+                          {{ task.text }}
+                        </v-list-item-title>
+                      </v-list-item-content>
+      
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteTask(index)">
+                          <v-icon color="red">mdi-delete</v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-container>
+          `
+        };
+      </script>
+
+    <!-- О приложении -->
+    <script>
+      const About = {
+        template: `
+          <v-container class="mt-5">
+            <v-card class="pa-5">
+              <v-card-title class="headline">О приложении</v-card-title>
+              <v-card-text>
+                <p>Это простое приложение для создания и управления списком дел.</p>
+                <p>Тимашков Алексей, Студент ИРНИТУ.</p>
+              </v-card-text>
+            </v-card>
+          </v-container>
+        `
+      };
+    </script>
+
+    <!-- Инициализация Vue-->
+    <script>
+        const routes = [
+          { path: '/', component: Home },
+          { path: '/about', component: About }
+        ];
+      
+        const router = new VueRouter({ routes });
+      
+        new Vue({
+          el: '#app',
+          vuetify: new Vuetify(),
+          router,
+          store
+        });
+      </script>
+
+    <style>
+      .text-decoration-line-through {
+        text-decoration: line-through;
+      }
+    </style>
+  </body>
+</html>
